@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ownerwaroengsederhana/app/firebases/auth_service.dart';
@@ -8,6 +9,7 @@ import 'package:ownerwaroengsederhana/app/modules/chat/widgets/message_bubble.da
 import 'package:ownerwaroengsederhana/app/routes/app_pages.dart';
 import 'package:ownerwaroengsederhana/app/utils/loading.dart';
 import 'package:ownerwaroengsederhana/colors.dart';
+import 'package:intl/intl.dart';
 
 class ChatView extends StatefulWidget {
   const ChatView({super.key});
@@ -26,14 +28,19 @@ class _ChatViewState extends State<ChatView> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: chatC.getMessage(authC.auth.currentUser!.uid, userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
+          String chatRoomId =
+              chatC.getRoomId(authC.auth.currentUser!.uid, userId);
+
           final snap = snapshot.data!.docs;
+
           List<Message> allMsg = snap.map((doc) {
-            return Message.fromFirestore(doc.data());
+            return Message.fromFirestore(doc);
           }).toList();
+
           return Scaffold(
             body: Stack(
               children: [
@@ -43,13 +50,28 @@ class _ChatViewState extends State<ChatView> {
                     itemCount: allMsg.length,
                     itemBuilder: (context, index) {
                       bool isMe = false;
+                      bool isRead = allMsg[index].isRead;
+                      DateTime time = allMsg[index].timeStamps.toDate();
+
+                      // Format jam (contoh: 08:30 AM)
+                      String formattedTime = DateFormat('h:mm a').format(time);
 
                       if (allMsg[index].senderId ==
                           authC.auth.currentUser!.uid) {
                         isMe = true;
+                      } else {
+                        // Tandai pesan sebagai dibaca jika bukan dari pengguna saat ini dan belum dibaca
+                        if (!allMsg[index].isRead) {
+                          chatC.markMessageAsRead(chatRoomId, allMsg[index].id);
+                        }
                       }
-                      return MessageBubble(allMsg[index].message,
-                          isMe == true ? 'Saya' : '$username', isMe);
+
+                      return MessageBubble(
+                          allMsg[index].message,
+                          isMe ? 'Saya' : username,
+                          formattedTime,
+                          isMe,
+                          isRead);
                     },
                   ),
                 ),

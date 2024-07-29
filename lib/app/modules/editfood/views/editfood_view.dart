@@ -21,6 +21,7 @@ class _EditfoodViewState extends State<EditfoodView> {
   final fId = Get.arguments;
   FirestoreService fireC = FirestoreService();
   FoodCategory? selectedItem;
+  FoodCategory? newItem;
   String? imageLink = '';
 
   // memilih file dari memori
@@ -41,6 +42,7 @@ class _EditfoodViewState extends State<EditfoodView> {
     setState(() {
       imageLink = '';
       selectedItem = null;
+      newItem = null;
       editFoodC.name.clear();
       editFoodC.description.clear();
       editFoodC.price.clear();
@@ -60,10 +62,16 @@ class _EditfoodViewState extends State<EditfoodView> {
           final category = categoryFull.split('.').last;
           FoodCategory selectCategory = getCategoryFromString(category);
           imageLink = food['imageUrl'];
-          selectedItem = selectCategory;
+          FoodCategory? getItem = selectCategory;
           editFoodC.name.text = food['name'];
           editFoodC.description.text = food['description'];
           editFoodC.price.text = food['price'].toString();
+
+          if (selectedItem != null) {
+            newItem = selectedItem;
+          } else {
+            newItem = getItem;
+          }
 
           return Scaffold(
             appBar: AppBar(
@@ -127,7 +135,7 @@ class _EditfoodViewState extends State<EditfoodView> {
                       hint: const Text(
                         'Pilih kategori menu',
                       ),
-                      value: selectedItem,
+                      value: newItem,
                       padding: const EdgeInsets.all(5),
                       items: FoodCategory.values.map((FoodCategory category) {
                         return DropdownMenuItem<FoodCategory>(
@@ -211,7 +219,7 @@ class _EditfoodViewState extends State<EditfoodView> {
                               double price = double.parse(editFoodC.price.text);
                               fireC.editFood(
                                 fId,
-                                selectCategory.toString(),
+                                newItem.toString(),
                                 editFoodC.name.text,
                                 editFoodC.description.text,
                                 imageLink.toString(),

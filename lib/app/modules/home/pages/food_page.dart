@@ -130,6 +130,7 @@ class _FoodPageState extends State<FoodPage> {
           final listFood = snapshot.data!['food'];
           final listCart = snapshot.data!['cart'];
           allFoodC.clearFood();
+          allFoodC.clearCart();
 
           // final foodMap = listFood!
           //     .map((doc) =>

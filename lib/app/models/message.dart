@@ -1,46 +1,45 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Message {
+  final String id;
   final String senderId;
-  final String senderEmail;
+  final String senderPhone;
   final String receiverId;
   final String message;
   final Timestamp timeStamps;
+  final bool isRead;
 
   Message({
+    required this.id,
     required this.senderId,
-    required this.senderEmail,
+    required this.senderPhone,
     required this.receiverId,
     required this.message,
     required this.timeStamps,
+    required this.isRead,
   });
 
-  factory Message.fromFirestore(Map<String, dynamic> data) {
+  factory Message.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data()!;
     return Message(
-        senderId: data['senderId'],
-        senderEmail: data['senderEmail'],
-        receiverId: data['receiverId'],
-        message: data['message'],
-        timeStamps: data['timeStamp']);
+      id: doc.id,
+      senderId: data['senderId'],
+      senderPhone: data['senderPhone'],
+      receiverId: data['receiverId'],
+      message: data['message'],
+      timeStamps: data['timeStamp'],
+      isRead: data['isRead'],
+    );
   }
-
-  // factory Message.fromFirestore(DocumentSnapshot doc) {
-  //   final data = doc.data() as Map<String, dynamic>;
-  //   return Message(
-  //       senderId: data['senderId'],
-  //       senderEmail: data['senderEmail'],
-  //       receiverId: data['receiverId'],
-  //       message: data['message'],
-  //       timeStamps: data['timeStamp']);
-  // }
 
   Map<String, dynamic> toMap() {
     return {
       'senderId': senderId,
-      'senderEmail': senderEmail,
+      'senderPhone': senderPhone,
       'receiverId': receiverId,
       'message': message,
       'timeStamp': timeStamps,
+      'isRead': isRead,
     };
   }
 }

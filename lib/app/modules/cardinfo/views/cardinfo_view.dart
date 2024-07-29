@@ -1,7 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ownerwaroengsederhana/app/firebases/firestore_service.dart';
-import 'package:ownerwaroengsederhana/app/models/card.dart';
 import 'package:ownerwaroengsederhana/app/modules/cardinfo/controllers/cardinfo_controller.dart';
 import 'package:ownerwaroengsederhana/app/utils/loading.dart';
 import 'package:ownerwaroengsederhana/colors.dart';
@@ -16,7 +16,8 @@ class CardinfoView extends StatefulWidget {
 class _CardinfoViewState extends State<CardinfoView> {
   String? selectedItem1;
   String? selectedItem2;
-  List<Cards> _listCards = [];
+  String? value1;
+  String? value2;
   final cardC = Get.put(CardinfoController());
   FirestoreService fireC = FirestoreService();
   String? cId;
@@ -39,150 +40,146 @@ class _CardinfoViewState extends State<CardinfoView> {
                 fontWeight: FontWeight.bold, color: tabColor, fontSize: 26),
           ),
         ),
-        body: FutureBuilder(
+        body: FutureBuilder<DocumentSnapshot<Object?>>(
           future: fireC.getCardInfo(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
-              _listCards.clear();
-              final snap = snapshot.data!.docs;
-              for (var card in snap) {
-                Map<String, dynamic> data = card.data() as Map<String, dynamic>;
-                _listCards.add(Cards(
-                    cId: card.id,
-                    item1: data['item1'],
-                    item2: data['item2'],
-                    number1: data['number1'],
-                    number2: data['number2'],
-                    name1: data['name1'],
-                    name2: data['name2']));
+              final snap = snapshot.data!;
+              Map<String, dynamic> data = snap.data() as Map<String, dynamic>;
+
+              String? item1 = data['item1'];
+              String? item2 = data['item2'];
+              cardC.number1.text = data['number1'];
+              cardC.number2.text = data['number2'];
+              cardC.name1.text = data['name1'];
+              cardC.name2.text = data['name2'];
+
+              if (selectedItem1 != null) {
+                value1 = selectedItem1;
+              } else {
+                value1 = item1;
+              }
+
+              if (selectedItem2 != null) {
+                value2 = selectedItem2;
+              } else {
+                value2 = item2;
               }
 
               return Stack(
                 children: [
-                  ListView.builder(
-                    itemCount: _listCards.length,
-                    itemBuilder: (context, index) {
-                      cId = _listCards[index].cId;
-                      print(_listCards[index].name1);
-                      selectedItem1 = _listCards[index].item1;
-                      selectedItem2 = _listCards[index].item2;
-                      cardC.number1.text = _listCards[index].number1;
-                      cardC.number2.text = _listCards[index].number1;
-                      cardC.name1.text = _listCards[index].name1;
-                      cardC.name2.text = _listCards[index].name2;
-
-                      return Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'DATA 1',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
+                  SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'DATA 1',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          DropdownButtonFormField<String>(
+                            dropdownColor: greyColor400,
+                            decoration: InputDecoration(
+                                filled: true,
+                                fillColor: textfielColor,
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10))),
+                            hint: const Text(
+                              'Pilih kategori menu',
                             ),
-                            SizedBox(
-                              height: 10,
+                            value: value1,
+                            padding: const EdgeInsets.all(5),
+                            items: _dropItem.map((String category) {
+                              return DropdownMenuItem<String>(
+                                  value: category,
+                                  child: Text(category.toUpperCase()));
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                selectedItem1 = newValue;
+                              });
+                            },
+                          ),
+                          TextField(
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                                label: Text(
+                              'Nomor Transfer',
+                              style: TextStyle(color: blackColor),
+                            )),
+                            controller: cardC.number1,
+                          ),
+                          TextField(
+                            decoration: const InputDecoration(
+                              label: Text('Atas Nama',
+                                  style: TextStyle(color: blackColor)),
                             ),
-                            DropdownButtonFormField<String>(
-                              dropdownColor: greyColor400,
-                              decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: textfielColor,
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10))),
-                              hint: const Text(
-                                'Pilih kategori menu',
-                              ),
-                              value: selectedItem1,
-                              padding: const EdgeInsets.all(5),
-                              items: _dropItem.map((String category) {
-                                return DropdownMenuItem<String>(
-                                    value: category,
-                                    child: Text(category.toUpperCase()));
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  selectedItem1 = newValue;
-                                });
-                              },
+                            controller: cardC.name1,
+                          ),
+                          const SizedBox(
+                            height: 40,
+                          ),
+                          const Text(
+                            'DATA 2',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          DropdownButtonFormField<String>(
+                            dropdownColor: greyColor400,
+                            decoration: InputDecoration(
+                                filled: true,
+                                fillColor: textfielColor,
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10))),
+                            hint: const Text(
+                              'Pilih kategori menu',
                             ),
-                            TextField(
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                  label: Text(
-                                'Nomor Transfer',
-                                style: TextStyle(color: blackColor),
-                              )),
-                              controller: cardC.number1,
+                            value: value2,
+                            padding: const EdgeInsets.all(5),
+                            items: _dropItem.map((String category) {
+                              return DropdownMenuItem<String>(
+                                  value: category,
+                                  child: Text(category.toUpperCase()));
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                selectedItem2 = newValue;
+                              });
+                            },
+                          ),
+                          TextField(
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                                label: Text(
+                              'Nomor Transfer',
+                              style: TextStyle(color: blackColor),
+                            )),
+                            controller: cardC.number2,
+                          ),
+                          TextField(
+                            decoration: const InputDecoration(
+                              label: Text('Atas Nama',
+                                  style: TextStyle(color: blackColor)),
                             ),
-                            TextField(
-                              decoration: InputDecoration(
-                                label: Text('Atas Nama',
-                                    style: TextStyle(color: blackColor)),
-                              ),
-                              controller: cardC.name1,
-                            ),
-                            SizedBox(
-                              height: 40,
-                            ),
-                            Text(
-                              'DATA 2',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            DropdownButtonFormField<String>(
-                              dropdownColor: greyColor400,
-                              decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: textfielColor,
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10))),
-                              hint: const Text(
-                                'Pilih kategori menu',
-                              ),
-                              value: selectedItem2,
-                              padding: const EdgeInsets.all(5),
-                              items: _dropItem.map((String category) {
-                                return DropdownMenuItem<String>(
-                                    value: category,
-                                    child: Text(category.toUpperCase()));
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  selectedItem2 = newValue;
-                                });
-                              },
-                            ),
-                            TextField(
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                  label: Text(
-                                'Nomor Transfer',
-                                style: TextStyle(color: blackColor),
-                              )),
-                              controller: cardC.number2,
-                            ),
-                            TextField(
-                              decoration: InputDecoration(
-                                label: Text('Atas Nama',
-                                    style: TextStyle(color: blackColor)),
-                              ),
-                              controller: cardC.name2,
-                            ),
-                            SizedBox(
-                              height: 60,
-                            )
-                          ],
-                        ),
-                      );
-                    },
+                            controller: cardC.name2,
+                          ),
+                          const SizedBox(
+                            height: 60,
+                          )
+                        ],
+                      ),
+                    ),
                   ),
                   Padding(
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     child: Align(
                       alignment: Alignment.bottomCenter,
                       child: SizedBox(
@@ -196,13 +193,15 @@ class _CardinfoViewState extends State<CardinfoView> {
                               onPressed: () {
                                 fireC.editCard(
                                   cId.toString(),
-                                  selectedItem1.toString(),
-                                  selectedItem2.toString(),
+                                  value1.toString(),
+                                  value2.toString(),
                                   cardC.number1.text,
                                   cardC.number2.text,
                                   cardC.name1.text,
                                   cardC.name2.text,
                                 );
+                                Get.snackbar(
+                                    'Perhatian', 'Berhasil mengubah data');
                                 Get.back();
                               },
                               child: const Text(
@@ -218,7 +217,7 @@ class _CardinfoViewState extends State<CardinfoView> {
                 ],
               );
             }
-            return LoadingView();
+            return const LoadingView();
           },
         ));
   }

@@ -116,6 +116,7 @@ class _EdituserViewState extends State<EdituserView> {
                       width: size.width * 0.7,
                       child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
+                              backgroundColor: tabColor,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5))),
                           onPressed: () {
@@ -130,7 +131,29 @@ class _EdituserViewState extends State<EdituserView> {
                           child: const Text(
                             'SIMPAN',
                             style: TextStyle(
-                              color: blackColor,
+                              color: whiteColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ))),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  SizedBox(
+                      height: 40,
+                      width: size.width * 0.4,
+                      child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: whiteColor,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5))),
+                          onPressed: () {
+                            Get.offAllNamed(Routes.home);
+                          },
+                          child: const Text(
+                            'BATAL',
+                            style: TextStyle(
+                              color: tabColor,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),

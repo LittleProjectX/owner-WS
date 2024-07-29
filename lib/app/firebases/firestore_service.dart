@@ -46,8 +46,8 @@ class FirestoreService extends GetxController {
     return owner.doc(uId).snapshots();
   }
 
-  Future<QuerySnapshot<Object?>> getCardInfo() {
-    return cards.get();
+  Future<DocumentSnapshot<Object?>> getCardInfo() {
+    return cards.doc('GrGrArDa5Tbuc1UPxQ9m').get();
   }
 
   Future<void> addFood(
@@ -156,6 +156,6 @@ class FirestoreService extends GetxController {
   }
 
   Future<void> deleteOrder(String oId) {
-    return food.doc(oId).delete();
+    return order.doc(oId).delete();
   }
 }

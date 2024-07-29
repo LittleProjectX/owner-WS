@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-// ignore: unnecessary_import
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:ownerwaroengsederhana/colors.dart';
 
 class MessageBubble extends StatelessWidget {
   final String message;
   final String name;
+  final String time;
   final bool isMe;
+  final bool isRead;
 
-  const MessageBubble(this.message, this.name, this.isMe, {super.key});
+  const MessageBubble(
+      this.message, this.name, this.time, this.isMe, this.isRead,
+      {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +19,11 @@ class MessageBubble extends StatelessWidget {
       mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
         Container(
-          constraints: BoxConstraints(maxWidth: Get.width * 2 / 3),
+          constraints: BoxConstraints(maxWidth: Get.width * 3 / 4),
           decoration: BoxDecoration(
-            color: isMe ? Colors.green[300] : Colors.blue[400],
+            color: isMe
+                ? const Color.fromARGB(255, 188, 252, 191)
+                : const Color.fromARGB(255, 155, 210, 255),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
@@ -28,19 +33,39 @@ class MessageBubble extends StatelessWidget {
                 isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
               Text(
-                name,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: isMe ? Colors.black : Colors.white,
-                ),
-              ),
-              Text(
                 message,
                 maxLines: null,
                 softWrap: true,
-                style: TextStyle(color: isMe ? Colors.black : Colors.white),
+                style: const TextStyle(color: Colors.black, fontSize: 16),
                 textAlign: isMe ? TextAlign.end : TextAlign.start,
               ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment:
+                    isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+                children: [
+                  Text(
+                    time,
+                    style: const TextStyle(color: greyColor, fontSize: 10),
+                  ),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  Visibility(
+                      visible: isMe ? true : false,
+                      child: isRead
+                          ? const Icon(
+                              Icons.done_all,
+                              color: Colors.blue,
+                            )
+                          : const Icon(
+                              Icons.done,
+                              color: greyColor,
+                            ))
+                ],
+              )
             ],
           ),
         ),

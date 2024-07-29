@@ -207,9 +207,17 @@ class _AllOrderState extends State<AllOrder> {
                                                   Get.back();
                                                 },
                                                 onConfirm: () {
-                                                  fireC.deleteOrder(
-                                                      categoryList[index].oId);
-                                                  Get.back();
+                                                  fireC
+                                                      .deleteOrder(
+                                                          categoryList[index]
+                                                              .oId)
+                                                      .then(
+                                                    (_) {
+                                                      Get.snackbar('Perhatian',
+                                                          'Berhasil menghapus data Order');
+                                                      Get.back();
+                                                    },
+                                                  );
                                                 },
                                               );
                                             },

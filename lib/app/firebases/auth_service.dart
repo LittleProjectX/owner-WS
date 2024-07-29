@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ownerwaroengsederhana/app/modules/otp/views/otp_view.dart';
 import 'package:ownerwaroengsederhana/app/routes/app_pages.dart';
 
 class AuthService extends GetxController {
@@ -7,28 +9,44 @@ class AuthService extends GetxController {
 
   Stream<User?> get streamAuthStatus => auth.authStateChanges();
 
-  void siginWithPhone(String phoneNumber) async {
+  void siginWithPhone(String phoneNumber, BuildContext context) async {
     try {
-      await auth.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          await auth.signInWithCredential(credential);
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          if (e.code == 'invalid-phone-number') {}
-          throw Exception(e.message);
-        },
-        codeSent: (String verificationId, int? resendToken) async {
-          Get.toNamed(Routes.otp, arguments: verificationId);
-        },
-        codeAutoRetrievalTimeout: (String verificationId) async {},
-      );
-    } on FirebaseAuthException catch (e) {
-      throw Exception(e.message);
+      await FirebaseAuth.instance.verifyPhoneNumber(
+          phoneNumber: "+$phoneNumber",
+          verificationCompleted: (credential) async {
+            // await FirebaseAuth.instance.signInWithCredential(credential).then(
+            //   (_) {
+            //     Get.offAllNamed(Routes.userinfo);
+            //   },
+            // );
+          },
+          verificationFailed: (exception) {
+            Get.snackbar('Perhatian', exception.message.toString());
+          },
+          codeSent: (verificationId, resendcode) async {
+            String? smsCode = await Navigator.push(
+              context,
+              // Create the SelectionScreen in the next step.
+              MaterialPageRoute(builder: (context) => const OtpView()),
+            );
+
+            if (smsCode != null) {
+              PhoneAuthCredential credential = PhoneAuthProvider.credential(
+                  verificationId: verificationId, smsCode: smsCode);
+              await FirebaseAuth.instance.signInWithCredential(credential).then(
+                (value) {
+                  Get.offAllNamed(Routes.userinfo);
+                },
+              );
+            }
+          },
+          codeAutoRetrievalTimeout: (verificationid) {});
+    } catch (e) {
+      Get.snackbar('Perhatian', e.toString());
     }
   }
 
-  void getOTP(String verificationId, userOTP) async {
+  Future<void> getOTP(String verificationId, String userOTP) async {
     try {
       PhoneAuthCredential credential = PhoneAuthProvider.credential(
         verificationId: verificationId,
@@ -37,15 +55,9 @@ class AuthService extends GetxController {
       await auth.signInWithCredential(credential);
       Get.offAllNamed(Routes.userinfo);
     } on FirebaseAuthException catch (e) {
-      throw Exception(e.message);
-    }
-  }
-
-  void signOut() async {
-    try {
-      await auth.signOut();
+      Get.snackbar('Error', e.message.toString());
     } catch (e) {
-      throw Exception(e.toString());
+      Get.snackbar('Error', 'Terjadi kesalahan: $e');
     }
   }
 }
